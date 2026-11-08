@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Apply for leave', 'leaves', ~{::section.page}, ~{})}">
+<body>
+<section class="page">
+    <div class="page-head"><h1>Apply for leave</h1><a class="btn btn-outline-secondary" th:href="@{/employee/leaves}">Back</a></div>
+    <div class="row g-3">
+        <div class="col-lg-7"><div class="panel"><div class="panel-body">
+            <form th:action="@{/employee/leaves/apply}" th:object="${form}" method="post" novalidate data-once>
+                <div class="mb-3">
+                    <label class="form-label" for="leaveType">Leave type</label>
+                    <select class="form-select" th:field="*{leaveType}" th:errorclass="is-invalid">
+                        <option th:each="t : ${leaveTypes}" th:value="${t}" th:text="${t.label}">Casual leave</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{leaveType}">Error</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6"><div th:replace="~{fragments/forms :: input('startDate', 'From', 'date')}"></div></div>
+                    <div class="col-md-6"><div th:replace="~{fragments/forms :: input('endDate', 'To', 'date')}"></div></div>
+                </div>
+                <p class="text-secondary">Counts as: <strong id="dayEstimate">-</strong> (weekends are not counted)</p>
+                <div class="mb-3">
+                    <label class="form-label" for="reason">Reason</label>
+                    <textarea class="form-control" rows="3" th:field="*{reason}" th:errorclass="is-invalid" maxlength="500"></textarea>
+                    <div class="invalid-feedback" th:errors="*{reason}">Error</div>
+                </div>
+                <button class="btn btn-primary" type="submit">Send request</button>
+            </form>
+        </div></div></div>
+        <div class="col-lg-5"><div class="panel"><div class="panel-head"><h2>Available now</h2></div><div class="panel-body">
+            <div class="mb-3" th:each="b : ${balances}">
+                <div class="d-flex justify-content-between"><span th:text="${b.type.label}">Casual</span>
+                    <strong th:text="${b.available} + ' days'">0 days</strong></div>
+                <div class="small text-secondary" th:if="${b.pending > 0}" th:text="${b.pending} + ' more day(s) are held by pending requests'"></div>
+            </div>
+            <p class="small text-secondary mb-0">Only sick leave can be back-dated (up to 30 days). A request must stay within one calendar year.</p>
+        </div></div></div>
+    </div>
+</section>
+</body>
+</html>

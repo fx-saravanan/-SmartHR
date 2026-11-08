@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Something went wrong - SmartHR</title>
+    <th:block th:replace="~{fragments/assets :: css}"></th:block>
+</head>
+<body class="auth">
+<div class="auth-form-wrap" style="min-height:100vh">
+    <div class="auth-card text-center">
+        <div class="display-4 fw-bold text-secondary" th:text="${status} ?: 'Error'">404</div>
+        <h1 class="mt-2" th:text="${error} ?: 'Something went wrong'">Not Found</h1>
+        <p class="text-secondary" th:text="${message} ?: 'The page could not be shown.'">Message</p>
+        <a class="btn btn-primary" th:href="@{/default}">Back to SmartHR</a>
+    </div>
+</div>
+</body>
+</html>

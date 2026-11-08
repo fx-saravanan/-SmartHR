@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('My profile', 'profile', ~{::section.page}, ~{})}">
+<body>
+<section class="page">
+    <div class="page-head"><div><h1>My profile</h1><p>Your email, department and salary are managed by an administrator.</p></div></div>
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="panel mb-3"><div class="panel-head"><h2>Employment</h2></div><div class="panel-body">
+                <dl class="kv mb-0">
+                    <dt>Employee ID</dt><dd th:text="${employee.employeeCode}">EMP0001</dd>
+                    <dt>Email</dt><dd th:text="${employee.email}">mail</dd>
+                    <dt>Department</dt><dd th:text="${employee.department != null} ? ${employee.department.name} : '-'">-</dd>
+                    <dt>Designation</dt><dd th:text="${employee.designation}">Role</dd>
+                    <dt>Joined</dt><dd th:text="${#temporals.format(employee.joiningDate, 'dd MMM yyyy')}">date</dd>
+                </dl></div></div>
+            <div class="panel"><div class="panel-head"><h2>Change password</h2></div><div class="panel-body">
+                <div class="alert alert-danger" th:if="${passwordError}" th:text="${passwordError}"></div>
+                <form th:action="@{/employee/password}" th:object="${passwordForm}" method="post" novalidate data-once>
+                    <div th:replace="~{fragments/forms :: input('currentPassword', 'Current password', 'password')}"></div>
+                    <div th:replace="~{fragments/forms :: input('newPassword', 'New password', 'password')}"></div>
+                    <div th:replace="~{fragments/forms :: input('confirmPassword', 'Confirm new password', 'password')}"></div>
+                    <button class="btn btn-primary" type="submit">Change password</button>
+                </form></div></div>
+        </div>
+        <div class="col-lg-6">
+            <div class="panel"><div class="panel-head"><h2>Contact details</h2></div><div class="panel-body">
+                <form th:action="@{/employee/profile}" th:object="${profileForm}" method="post" novalidate data-once>
+                    <div class="row">
+                        <div class="col-md-6"><div th:replace="~{fragments/forms :: input('firstName', 'First name', 'text')}"></div></div>
+                        <div class="col-md-6"><div th:replace="~{fragments/forms :: input('lastName', 'Last name', 'text')}"></div></div>
+                    </div>
+                    <div th:replace="~{fragments/forms :: input('phone', 'Phone', 'tel')}"></div>
+                    <div th:replace="~{fragments/forms :: input('address', 'Address', 'text')}"></div>
+                    <button class="btn btn-primary" type="submit">Save changes</button>
+                </form></div></div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

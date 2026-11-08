@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Dashboard', 'dashboard', ~{::section.page}, ~{::script})}">
+<body>
+<section class="page">
+    <div class="page-head">
+        <div><h1 th:text="'Hello, ' + ${employee.firstName}">Hello</h1>
+            <p th:text="${employee.designation} + (${employee.department != null} ? ' in ' + ${employee.department.name} : '')">Role</p></div>
+        <a class="btn btn-primary" th:href="@{/employee/leaves/apply}"><i class="bi bi-calendar-plus me-1"></i>Apply for leave</a>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-lg-4">
+            <div class="panel h-100"><div class="panel-body">
+                <div class="text-secondary">Today</div>
+                <div class="clock" id="liveClock">--:--:--</div>
+                <div class="my-2" th:if="${today == null}">You have not checked in yet.</div>
+                <div class="my-2" th:if="${today != null}">
+                    In at <strong th:text="${#temporals.format(today.checkIn, 'HH:mm')}">09:00</strong>
+                    <span th:if="${today.checkOut != null}">, out at <strong th:text="${#temporals.format(today.checkOut, 'HH:mm')}">18:00</strong></span>
+                    <span th:replace="~{fragments/forms :: badge(${today.status})}"></span>
+                </div>
+                <div class="d-flex gap-2">
+                    <form th:action="@{/employee/attendance/check-in}" method="post" data-once>
+                        <button class="btn btn-primary" type="submit" th:disabled="${today != null}">Check in</button></form>
+                    <form th:action="@{/employee/attendance/check-out}" method="post" data-once>
+                        <button class="btn btn-outline-primary" type="submit" th:disabled="${today == null or today.checkOut != null}">Check out</button></form>
+                </div>
+            </div></div>
+        </div>
+        <div class="col-lg-8">
+            <div class="panel h-100">
+                <div class="panel-head"><h2>Leave balance</h2><a class="small" th:href="@{/employee/leaves}">Details</a></div>
+                <div class="panel-body"><div class="row g-3">
+                    <div class="col-md-4" th:each="b : ${balances}">
+                        <div class="fw-semibold" th:text="${b.type.label}">Casual</div>
+                        <div class="fs-3 fw-bold" th:text="${b.remaining}">0</div>
+                        <div class="small text-secondary" th:text="'of ' + ${b.allocated} + ' days left'">of 12</div>
+                        <div class="meter mt-2" th:classappend="${b.usedPercent >= 80} ? 'warn'"><span th:style="'width:' + ${b.usedPercent} + '%'"></span></div>
+                    </div>
+                </div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="panel h-100">
+                <div class="panel-head"><h2>This month</h2><a class="small" th:href="@{/employee/attendance}">Attendance</a></div>
+                <div class="panel-body row text-center">
+                    <div class="col"><div class="fs-3 fw-bold" th:text="${summary['present']}">0</div><div class="small text-secondary">On time</div></div>
+                    <div class="col"><div class="fs-3 fw-bold" th:text="${summary['late']}">0</div><div class="small text-secondary">Late</div></div>
+                    <div class="col"><div class="fs-3 fw-bold" th:text="${summary['halfDay']}">0</div><div class="small text-secondary">Half days</div></div>
+                    <div class="col"><div class="fs-3 fw-bold" th:text="${summary['hours']}">0</div><div class="small text-secondary">Hours</div></div>
+                </div>
+                <div class="panel-body border-top" th:if="${latestSlip != null}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><div class="small text-secondary">Latest salary slip</div><div class="fw-semibold" th:text="${latestSlip.periodLabel}">Month</div></div>
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/employee/salary/{id}/pdf(id=${latestSlip.id})}"><i class="bi bi-download me-1"></i>Download</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="panel h-100">
+                <div class="panel-head"><h2>Recent updates</h2><a class="small" th:href="@{/notifications}">All</a></div>
+                <div class="note" th:each="n : ${recentNotes}" th:classappend="${!n.readFlag} ? 'unread'">
+                    <div th:text="${n.message}">Message</div>
+                    <small class="text-secondary" th:text="${#temporals.format(n.createdAt, 'dd MMM, HH:mm')}">date</small>
+                </div>
+                <div class="empty" th:if="${recentNotes.isEmpty()}">No updates yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel mt-3">
+        <div class="panel-head"><h2>Recent leave requests</h2>
+            <span class="small text-secondary" th:text="${pendingCount} + ' pending'">0 pending</span></div>
+        <div class="table-wrap"><table class="table"><tbody>
+            <tr th:each="l : ${recentLeaves}"><td th:text="${l.leaveType.label}">Casual</td>
+                <td th:text="${#temporals.format(l.startDate, 'dd MMM')} + ' - ' + ${#temporals.format(l.endDate, 'dd MMM yyyy')}">dates</td>
+                <td class="num" th:text="${l.days} + 'd'">1d</td>
+                <td><span th:replace="~{fragments/forms :: badge(${l.status})}"></span></td></tr>
+            <tr th:if="${recentLeaves.isEmpty()}"><td class="empty">You have not applied for leave yet.</td></tr>
+        </tbody></table></div>
+    </div>
+</section>
+<script>/* clock is driven by app.js */</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Salary slips', 'salary', ~{::section.page}, ~{})}">
+<body>
+<section class="page">
+    <div class="page-head"><div><h1>Salary</h1><p>Your monthly structure and every salary slip issued to you.</p></div></div>
+    <div class="row g-3 mb-3">
+        <div class="col-md-3"><div class="stat"><div class="label">Basic</div><div class="value fs-4" th:text="'₹ ' + ${#numbers.formatDecimal(employee.basicSalary, 1, 'COMMA', 0, 'POINT')}">0</div></div></div>
+        <div class="col-md-3"><div class="stat"><div class="label">HRA</div><div class="value fs-4" th:text="'₹ ' + ${#numbers.formatDecimal(employee.hra, 1, 'COMMA', 0, 'POINT')}">0</div></div></div>
+        <div class="col-md-3"><div class="stat"><div class="label">Allowances</div><div class="value fs-4" th:text="'₹ ' + ${#numbers.formatDecimal(employee.allowances, 1, 'COMMA', 0, 'POINT')}">0</div></div></div>
+        <div class="col-md-3"><div class="stat"><div class="label">Gross a month</div><div class="value fs-4" th:text="'₹ ' + ${#numbers.formatDecimal(employee.grossSalary, 1, 'COMMA', 0, 'POINT')}">0</div></div></div>
+    </div>
+    <div class="panel"><div class="table-wrap"><table class="table">
+        <thead><tr><th>Month</th><th class="num">Gross</th><th class="num">Deductions</th><th class="num">Net pay</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="p : ${slips}">
+            <td class="fw-semibold" th:text="${p.periodLabel}">Month</td>
+            <td class="num" th:text="${#numbers.formatDecimal(p.grossPay, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num" th:text="${#numbers.formatDecimal(p.totalDeductions, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num fw-semibold" th:text="${#numbers.formatDecimal(p.netPay, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td><span th:replace="~{fragments/forms :: badge(${p.status})}"></span></td>
+            <td class="text-end"><a class="btn btn-sm btn-primary" th:href="@{/employee/salary/{id}/pdf(id=${p.id})}"><i class="bi bi-download me-1"></i>Download PDF</a></td>
+        </tr>
+        <tr th:if="${slips.isEmpty()}"><td colspan="6" class="empty">No salary slips yet. They appear here once payroll is run for a month.</td></tr>
+        </tbody></table></div></div>
+</section>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Payroll', 'payroll', ~{::section.page}, ~{})}">
+<body>
+<section class="page">
+    <div class="page-head">
+        <div><h1>Payroll</h1><p>Gross pay less provident fund, tax and loss of pay for unpaid leave. Set salaries on each employee's page.</p></div>
+    </div>
+    <form class="panel panel-body mb-3 row g-2 align-items-end" method="get" th:action="@{/admin/payroll}">
+        <div class="col-6 col-md-3"><label class="form-label" for="month">Month</label>
+            <select class="form-select" id="month" name="month">
+                <option th:each="m : ${#numbers.sequence(1, 12)}" th:value="${m}" th:selected="${m == month}"
+                        th:text="${T(java.time.Month).of(m).getDisplayName(T(java.time.format.TextStyle).FULL, T(java.util.Locale).ENGLISH)}">January</option>
+            </select></div>
+        <div class="col-6 col-md-3"><label class="form-label" for="year">Year</label>
+            <select class="form-select" id="year" name="year">
+                <option th:each="y : ${years}" th:value="${y}" th:text="${y}" th:selected="${y == year}">2026</option>
+            </select></div>
+        <div class="col-md-2"><button class="btn btn-outline-primary w-100" type="submit">Show</button></div>
+    </form>
+
+    <div class="panel mb-3">
+        <div class="panel-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <div class="fw-semibold">Run payroll for the selected month</div>
+                <div class="small text-secondary">Skips employees without a salary, and slips already marked as paid.</div>
+            </div>
+            <form th:action="@{/admin/payroll/generate}" method="post" class="d-flex align-items-center gap-3"
+                  data-confirm="Generate salary slips for this month?" data-once>
+                <input type="hidden" name="year" th:value="${year}">
+                <input type="hidden" name="month" th:value="${month}">
+                <div class="form-check mb-0"><input class="form-check-input" type="checkbox" id="overwrite" name="overwrite" value="true">
+                    <label class="form-check-label" for="overwrite">Refresh existing unpaid slips</label></div>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-play-fill me-1"></i>Generate payroll</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-4"><div class="stat"><div class="label">Slips this month</div><div class="value" th:text="${slips.size()}">0</div></div></div>
+        <div class="col-md-4"><div class="stat"><div class="label">Total gross</div><div class="value" th:text="'₹ ' + ${#numbers.formatDecimal(totalGross, 1, 'COMMA', 0, 'POINT')}">0</div></div></div>
+        <div class="col-md-4"><div class="stat"><div class="label">Total net payable</div><div class="value" th:text="'₹ ' + ${#numbers.formatDecimal(totalNet, 1, 'COMMA', 0, 'POINT')}">0</div></div></div>
+    </div>
+
+    <div class="panel"><div class="table-wrap"><table class="table">
+        <thead><tr><th>Employee</th><th class="num">Gross</th><th class="num">PF</th><th class="num">Tax</th><th class="num">Loss of pay</th><th class="num">Net pay</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="p : ${slips}">
+            <td><div class="fw-semibold" th:text="${p.employee.fullName}">Name</div><div class="small text-secondary" th:text="${p.employee.employeeCode}">ID</div></td>
+            <td class="num" th:text="${#numbers.formatDecimal(p.grossPay, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num" th:text="${#numbers.formatDecimal(p.pfDeduction, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num" th:text="${#numbers.formatDecimal(p.taxDeduction, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num" th:text="${#numbers.formatDecimal(p.unpaidDeduction, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="num fw-semibold" th:text="${#numbers.formatDecimal(p.netPay, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td><span th:replace="~{fragments/forms :: badge(${p.status})}"></span></td>
+            <td class="text-end text-nowrap">
+                <a class="btn btn-sm btn-outline-primary" th:href="@{/admin/payroll/{id}/pdf(id=${p.id})}"><i class="bi bi-download me-1"></i>PDF</a>
+                <form class="d-inline" th:if="${p.status.name() == 'GENERATED'}" th:action="@{/admin/payroll/{id}/pay(id=${p.id})}" method="post"
+                      data-confirm="Mark this salary as paid?">
+                    <button class="btn btn-sm btn-primary" type="submit">Mark paid</button>
+                </form>
+            </td>
+        </tr>
+        <tr th:if="${slips.isEmpty()}"><td colspan="8" class="empty">No salary slips for this month yet. Run payroll to create them.</td></tr>
+        </tbody></table></div></div>
+</section>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Attendance', 'attendance', ~{::section.page}, ~{})}">
+<body>
+<section class="page">
+    <div class="page-head"><div><h1>Attendance</h1><p>Check-ins after 9:45 are marked late. Under four hours counts as a half day.</p></div></div>
+
+    <div class="panel mb-3"><div class="panel-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+            <div class="clock" id="liveClock">--:--:--</div>
+            <div th:if="${today == null}" class="text-secondary">You have not checked in today.</div>
+            <div th:if="${today != null}">
+                In at <strong th:text="${#temporals.format(today.checkIn, 'HH:mm')}">09:00</strong>
+                <span th:if="${today.checkOut != null}">, out at <strong th:text="${#temporals.format(today.checkOut, 'HH:mm')}">18:00</strong> (<span th:text="${today.workedLabel}">8h</span>)</span>
+                <span th:replace="~{fragments/forms :: badge(${today.status})}"></span>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <form th:action="@{/employee/attendance/check-in}" method="post" data-once>
+                <button class="btn btn-primary btn-lg" type="submit" th:disabled="${today != null}"><i class="bi bi-box-arrow-in-right me-1"></i>Check in</button></form>
+            <form th:action="@{/employee/attendance/check-out}" method="post" data-once>
+                <button class="btn btn-outline-primary btn-lg" type="submit" th:disabled="${today == null or today.checkOut != null}"><i class="bi bi-box-arrow-right me-1"></i>Check out</button></form>
+        </div>
+    </div></div>
+
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <h2 class="h5 mb-0" th:text="${monthLabel}">Month</h2>
+        <div class="btn-group">
+            <a class="btn btn-outline-secondary" th:href="@{/employee/attendance(month=${prevMonth})}" aria-label="Previous month"><i class="bi bi-chevron-left"></i></a>
+            <a class="btn btn-outline-secondary" th:classappend="${!canGoNext} ? 'disabled'" th:href="@{/employee/attendance(month=${nextMonth})}" aria-label="Next month"><i class="bi bi-chevron-right"></i></a>
+        </div>
+    </div>
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3"><div class="stat"><div class="label">On time</div><div class="value" th:text="${summary['present']}">0</div></div></div>
+        <div class="col-6 col-md-3"><div class="stat"><div class="label">Late</div><div class="value" th:text="${summary['late']}">0</div></div></div>
+        <div class="col-6 col-md-3"><div class="stat"><div class="label">Half days</div><div class="value" th:text="${summary['halfDay']}">0</div></div></div>
+        <div class="col-6 col-md-3"><div class="stat"><div class="label">Hours worked</div><div class="value" th:text="${summary['hours']}">0</div></div></div>
+    </div>
+    <div class="panel"><div class="table-wrap"><table class="table">
+        <thead><tr><th>Date</th><th>Check in</th><th>Check out</th><th>Worked</th><th>Status</th></tr></thead>
+        <tbody>
+        <tr th:each="a : ${records}">
+            <td th:text="${#temporals.format(a.workDate, 'EEE, dd MMM')}">date</td>
+            <td th:text="${#temporals.format(a.checkIn, 'HH:mm')}">09:00</td>
+            <td th:text="${a.checkOut != null} ? ${#temporals.format(a.checkOut, 'HH:mm')} : '-'">-</td>
+            <td th:text="${a.workedLabel}">-</td>
+            <td><span th:replace="~{fragments/forms :: badge(${a.status})}"></span></td>
+        </tr>
+        <tr th:if="${records.isEmpty()}"><td colspan="5" class="empty">No attendance recorded for this month.</td></tr>
+        </tbody></table></div></div>
+</section>
+</body>
+</html>

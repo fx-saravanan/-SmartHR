@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign in - SmartHR</title>
+    <th:block th:replace="~{fragments/assets :: css}"></th:block>
+</head>
+<body class="auth">
+<div class="auth-wrap">
+    <aside class="auth-panel">
+        <div class="brand">SmartHR</div>
+        <div>
+            <h2>Leave, attendance and pay in one place.</h2>
+            <p>See who is likely to be out next month before it happens, and keep every request, check-in and salary slip on record.</p>
+        </div>
+        <small class="text-white-50">Employee management and leave forecasting</small>
+    </aside>
+    <section class="auth-form-wrap">
+        <div class="auth-card">
+            <h1 class="mb-1">Sign in</h1>
+            <p class="text-secondary mb-4">Use the email address you registered with.</p>
+
+            <div class="alert alert-danger" th:if="${param.error}">That email and password do not match, or the account is deactivated.</div>
+            <div class="alert alert-success" th:if="${param.logout}">You have been signed out.</div>
+            <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+            <form th:action="@{/login}" method="post" data-once>
+                <div class="mb-3">
+                    <label class="form-label" for="username">Email</label>
+                    <input class="form-control" type="email" id="username" name="username" autocomplete="username" autofocus required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" for="password">Password</label>
+                    <input class="form-control" type="password" id="password" name="password" autocomplete="current-password" required>
+                </div>
+                <button class="btn btn-primary w-100" type="submit">Sign in</button>
+            </form>
+            <p class="text-center text-secondary mt-4 mb-0">New here? <a th:href="@{/register}">Create an employee account</a></p>
+        </div>
+    </section>
+</div>
+</body>
+</html>

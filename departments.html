@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Departments', 'departments', ~{::section.page}, ~{})}">
+<body>
+<section class="page">
+    <div class="page-head"><div><h1>Departments</h1><p>Group employees for reports and leave analytics.</p></div></div>
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="panel">
+                <div class="table-wrap"><table class="table">
+                    <thead><tr><th>Name</th><th>Description</th><th class="num">Employees</th><th></th></tr></thead>
+                    <tbody>
+                    <tr th:each="d : ${departments}">
+                        <td class="fw-semibold" th:text="${d.name}">Name</td>
+                        <td th:text="${d.description} ?: '-'">Desc</td>
+                        <td class="num" th:text="${headcounts[d.id]}">0</td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/departments(edit=${d.id})}">Edit</a>
+                            <form class="d-inline" th:action="@{/admin/departments/{id}/delete(id=${d.id})}" method="post"
+                                  data-confirm="Delete this department?">
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${departments.isEmpty()}"><td colspan="4" class="empty">No departments yet. Add the first one on the right.</td></tr>
+                    </tbody></table></div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="panel">
+                <div class="panel-head"><h2 th:text="${form.id == null} ? 'Add department' : 'Edit department'">Add department</h2></div>
+                <div class="panel-body">
+                    <form th:action="@{/admin/departments/save}" th:object="${form}" method="post" novalidate data-once>
+                        <input type="hidden" th:field="*{id}">
+                        <div th:replace="~{fragments/forms :: input('name', 'Name', 'text')}"></div>
+                        <div th:replace="~{fragments/forms :: input('description', 'Description', 'text')}"></div>
+                        <button class="btn btn-primary" type="submit">Save department</button>
+                        <a class="btn btn-outline-secondary" th:if="${form.id != null}" th:href="@{/admin/departments}">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

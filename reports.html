@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Reports', 'reports', ~{::section.page}, ~{})}">
+<body>
+<section class="page">
+    <div class="page-head"><div><h1>Reports</h1><p>Download CSV files that open in Excel or Google Sheets.</p></div></div>
+    <div class="row g-3">
+        <div class="col-lg-6"><div class="panel h-100"><div class="panel-head"><h2>Employee directory</h2></div><div class="panel-body">
+            <p class="text-secondary">Every employee with department, designation, joining date, salary structure and status.</p>
+            <a class="btn btn-primary" th:href="@{/admin/reports/employees.csv}"><i class="bi bi-download me-1"></i>Download CSV</a>
+        </div></div></div>
+        <div class="col-lg-6"><div class="panel h-100"><div class="panel-head"><h2>Leave report</h2></div><div class="panel-body">
+            <form method="get" th:action="@{/admin/reports/leaves.csv}" class="row g-2 align-items-end">
+                <div class="col-sm-5"><label class="form-label" for="from">From</label><input class="form-control" type="date" id="from" name="from" th:value="${from}" required></div>
+                <div class="col-sm-5"><label class="form-label" for="to">To</label><input class="form-control" type="date" id="to" name="to" th:value="${to}" required></div>
+                <div class="col-sm-2"><button class="btn btn-primary w-100" type="submit" aria-label="Download leave report"><i class="bi bi-download"></i></button></div>
+            </form></div></div></div>
+        <div class="col-lg-6"><div class="panel h-100"><div class="panel-head"><h2>Attendance report</h2></div><div class="panel-body">
+            <form method="get" th:action="@{/admin/reports/attendance.csv}" class="row g-2 align-items-end">
+                <div class="col-sm-5"><label class="form-label" for="am">Month</label><input class="form-control" type="number" id="am" name="month" min="1" max="12" th:value="${month}" required></div>
+                <div class="col-sm-5"><label class="form-label" for="ay">Year</label><input class="form-control" type="number" id="ay" name="year" min="2000" max="2100" th:value="${year}" required></div>
+                <div class="col-sm-2"><button class="btn btn-primary w-100" type="submit" aria-label="Download attendance report"><i class="bi bi-download"></i></button></div>
+            </form></div></div></div>
+        <div class="col-lg-6"><div class="panel h-100"><div class="panel-head"><h2>Payroll report</h2></div><div class="panel-body">
+            <form method="get" th:action="@{/admin/reports/payroll.csv}" class="row g-2 align-items-end">
+                <div class="col-sm-5"><label class="form-label" for="pm">Month</label><input class="form-control" type="number" id="pm" name="month" min="1" max="12" th:value="${month}" required></div>
+                <div class="col-sm-5"><label class="form-label" for="py">Year</label><input class="form-control" type="number" id="py" name="year" min="2000" max="2100" th:value="${year}" required></div>
+                <div class="col-sm-2"><button class="btn btn-primary w-100" type="submit" aria-label="Download payroll report"><i class="bi bi-download"></i></button></div>
+            </form></div></div></div>
+    </div>
+</section>
+</body>
+</html>

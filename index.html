@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SmartHR - Employee management and leave forecasting</title>
+    <th:block th:replace="~{fragments/assets :: css}"></th:block>
+    <style>
+        .hero { background: var(--ink); color: #fff; padding: 5rem 0 4.5rem; }
+        .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; letter-spacing: -.03em; max-width: 18ch; }
+        .hero p.lead { color: rgba(255,255,255,.75); max-width: 52ch; }
+        .feature i { font-size: 1.5rem; color: var(--teal); }
+        .nav-top { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
+        .btn-light-outline { border: 1px solid rgba(255,255,255,.5); color: #fff; }
+        .btn-light-outline:hover { background: rgba(255,255,255,.12); color: #fff; }
+    </style>
+</head>
+<body>
+<header class="hero">
+    <div class="container">
+        <div class="nav-top mb-5">
+            <span class="fs-4 fw-bold">SmartHR</span>
+            <div class="d-flex gap-2">
+                <a class="btn btn-light-outline" th:href="@{/login}">Sign in</a>
+                <a class="btn btn-light" th:href="@{/register}">Register</a>
+            </div>
+        </div>
+        <h1>Know who will be out before it happens.</h1>
+        <p class="lead mt-3">Manage employees, leave, attendance and payroll in one place, with a forecast of the next three months of leave built from your own history.</p>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+            <a class="btn btn-light btn-lg" th:href="@{/login}">Sign in</a>
+            <a class="btn btn-light-outline btn-lg" th:href="@{/register}">Create an employee account</a>
+        </div>
+    </div>
+</header>
+
+<main class="container py-5">
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4 feature"><i class="bi bi-calendar2-check"></i><h2 class="h5 mt-2">Leave that balances itself</h2>
+            <p class="text-secondary">Casual, sick, earned and unpaid leave with automatic balances, overlap checks, approvals and notifications.</p></div>
+        <div class="col-md-6 col-lg-4 feature"><i class="bi bi-graph-up-arrow"></i><h2 class="h5 mt-2">Leave forecasting</h2>
+            <p class="text-secondary">Monthly and department trends with charts, and a seasonal forecast with a confidence range.</p></div>
+        <div class="col-md-6 col-lg-4 feature"><i class="bi bi-clock-history"></i><h2 class="h5 mt-2">Attendance</h2>
+            <p class="text-secondary">One-click check-in and check-out, late and half-day marking, and a daily board for admins.</p></div>
+        <div class="col-md-6 col-lg-4 feature"><i class="bi bi-cash-stack"></i><h2 class="h5 mt-2">Payroll and salary slips</h2>
+            <p class="text-secondary">Monthly payroll with deductions, and PDF salary slips employees can download themselves.</p></div>
+        <div class="col-md-6 col-lg-4 feature"><i class="bi bi-shield-lock"></i><h2 class="h5 mt-2">Secure by default</h2>
+            <p class="text-secondary">BCrypt passwords and separate admin and employee areas, each limited to its own role.</p></div>
+        <div class="col-md-6 col-lg-4 feature"><i class="bi bi-file-earmark-bar-graph"></i><h2 class="h5 mt-2">Reports</h2>
+            <p class="text-secondary">Download employee, leave, attendance and payroll reports as CSV.</p></div>
+    </div>
+</main>
+
+<footer class="container pb-4 text-secondary small">SmartHR &middot; Employee management and leave prediction</footer>
+<th:block th:replace="~{fragments/assets :: js}"></th:block>
+</body>
+</html>

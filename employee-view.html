@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page(${employee.fullName}, 'employees', ~{::section.page}, ~{})}">
+<body>
+<section class="page">
+    <div class="page-head">
+        <div class="d-flex align-items-center gap-3">
+            <span class="avatar" style="width:48px;height:48px;font-size:1rem" th:text="${#strings.substring(employee.firstName,0,1)} + ${#strings.substring(employee.lastName,0,1)}">AB</span>
+            <div><h1 th:text="${employee.fullName}">Name</h1>
+                <p><span th:text="${employee.designation}">Role</span> <span th:replace="~{fragments/forms :: badge(${employee.active} ? 'ACTIVE' : 'INACTIVE')}"></span></p></div>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary" th:href="@{/admin/employees/{id}/edit(id=${employee.id})}"><i class="bi bi-pencil me-1"></i>Edit</a>
+            <form th:action="@{/admin/employees/{id}/toggle(id=${employee.id})}" method="post"
+                  th:attr="data-confirm=${employee.active} ? 'Deactivate this employee? They will no longer be able to sign in.' : 'Reactivate this employee?'">
+                <button class="btn btn-outline-secondary" type="submit" th:text="${employee.active} ? 'Deactivate' : 'Reactivate'">Deactivate</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="panel mb-3">
+                <div class="panel-head"><h2>Details</h2></div>
+                <div class="panel-body">
+                    <dl class="kv">
+                        <dt>Employee ID</dt><dd th:text="${employee.employeeCode}">EMP0001</dd>
+                        <dt>Email</dt><dd th:text="${employee.email}">mail</dd>
+                        <dt>Phone</dt><dd th:text="${employee.phone} ?: '-'">-</dd>
+                        <dt>Address</dt><dd th:text="${employee.address} ?: '-'">-</dd>
+                        <dt>Department</dt><dd th:text="${employee.department != null} ? ${employee.department.name} : '-'">-</dd>
+                        <dt>Joined</dt><dd th:text="${#temporals.format(employee.joiningDate, 'dd MMM yyyy')}">date</dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-head"><h2>Monthly salary</h2></div>
+                <div class="panel-body">
+                    <dl class="kv">
+                        <dt>Basic</dt><dd th:text="'₹ ' + ${#numbers.formatDecimal(employee.basicSalary, 1, 'COMMA', 2, 'POINT')}">0</dd>
+                        <dt>HRA</dt><dd th:text="'₹ ' + ${#numbers.formatDecimal(employee.hra, 1, 'COMMA', 2, 'POINT')}">0</dd>
+                        <dt>Allowances</dt><dd th:text="'₹ ' + ${#numbers.formatDecimal(employee.allowances, 1, 'COMMA', 2, 'POINT')}">0</dd>
+                        <dt class="fw-semibold">Gross</dt><dd class="fw-semibold" th:text="'₹ ' + ${#numbers.formatDecimal(employee.grossSalary, 1, 'COMMA', 2, 'POINT')}">0</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="panel mb-3">
+                <div class="panel-head"><h2 th:text="'Leave balance, ' + ${year}">Leave balance</h2></div>
+                <div class="panel-body">
+                    <div class="mb-3" th:each="b : ${balances}">
+                        <div class="d-flex justify-content-between"><span th:text="${b.type.label}">Casual</span>
+                            <span class="text-secondary" th:text="${b.remaining} + ' of ' + ${b.allocated} + ' days left'">x</span></div>
+                        <div class="meter mt-1"><span th:style="'width:' + ${b.usedPercent} + '%'"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel mb-3">
+                <div class="panel-head"><h2>Recent leave</h2></div>
+                <div class="table-wrap"><table class="table">
+                    <tbody>
+                    <tr th:each="l : ${leaves}"><td th:text="${l.leaveType.label}">Casual</td>
+                        <td th:text="${#temporals.format(l.startDate, 'dd MMM')} + ' - ' + ${#temporals.format(l.endDate, 'dd MMM yyyy')}">dates</td>
+                        <td class="num" th:text="${l.days} + 'd'">1d</td>
+                        <td><span th:replace="~{fragments/forms :: badge(${l.status})}"></span></td></tr>
+                    <tr th:if="${leaves.isEmpty()}"><td class="empty">No leave requests yet.</td></tr>
+                    </tbody></table></div>
+            </div>
+            <div class="panel">
+                <div class="panel-head"><h2>Salary slips</h2></div>
+                <div class="table-wrap"><table class="table">
+                    <tbody>
+                    <tr th:each="p : ${payslips}"><td th:text="${p.periodLabel}">Month</td>
+                        <td class="num" th:text="'₹ ' + ${#numbers.formatDecimal(p.netPay, 1, 'COMMA', 2, 'POINT')}">0</td>
+                        <td><span th:replace="~{fragments/forms :: badge(${p.status})}"></span></td>
+                        <td class="text-end"><a class="btn btn-sm btn-outline-primary" th:href="@{/admin/payroll/{id}/pdf(id=${p.id})}"><i class="bi bi-download"></i></a></td></tr>
+                    <tr th:if="${payslips.isEmpty()}"><td class="empty">No salary slips generated yet.</td></tr>
+                    </tbody></table></div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

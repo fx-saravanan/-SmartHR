@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create account - SmartHR</title>
+    <th:block th:replace="~{fragments/assets :: css}"></th:block>
+</head>
+<body class="auth">
+<div class="auth-wrap">
+    <aside class="auth-panel">
+        <div class="brand">SmartHR</div>
+        <div>
+            <h2>Create your employee account.</h2>
+            <p>Once you are in you can apply for leave, check in and out, and download your salary slips. An administrator sets your salary details.</p>
+        </div>
+        <small class="text-white-50">Passwords are stored as BCrypt hashes.</small>
+    </aside>
+    <section class="auth-form-wrap">
+        <div class="auth-card" style="max-width:480px">
+            <h1 class="mb-4">Register</h1>
+            <form th:action="@{/register}" th:object="${form}" method="post" novalidate data-once>
+                <div class="row">
+                    <div class="col-sm-6"><div th:replace="~{fragments/forms :: input('firstName', 'First name', 'text')}"></div></div>
+                    <div class="col-sm-6"><div th:replace="~{fragments/forms :: input('lastName', 'Last name', 'text')}"></div></div>
+                </div>
+                <div th:replace="~{fragments/forms :: input('email', 'Work email', 'email')}"></div>
+                <div th:replace="~{fragments/forms :: input('phone', 'Phone (optional)', 'tel')}"></div>
+                <div class="mb-3">
+                    <label class="form-label" for="departmentId">Department</label>
+                    <select class="form-select" th:field="*{departmentId}">
+                        <option value="">Not sure yet</option>
+                        <option th:each="d : ${departments}" th:value="${d.id}" th:text="${d.name}">Engineering</option>
+                    </select>
+                </div>
+                <div th:replace="~{fragments/forms :: input('password', 'Password', 'password')}"></div>
+                <div th:replace="~{fragments/forms :: input('confirmPassword', 'Confirm password', 'password')}"></div>
+                <button class="btn btn-primary w-100" type="submit">Create account</button>
+            </form>
+            <p class="text-center text-secondary mt-4 mb-0">Already registered? <a th:href="@{/login}">Sign in</a></p>
+        </div>
+    </section>
+</div>
+</body>
+</html>

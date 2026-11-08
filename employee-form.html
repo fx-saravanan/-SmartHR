@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page(${form.id == null ? 'Add employee' : 'Edit employee'}, 'employees', ~{::section.page}, ~{})}">
+<body>
+<section class="page">
+    <div class="page-head">
+        <h1 th:text="${form.id == null} ? 'Add employee' : 'Edit employee'">Add employee</h1>
+        <a class="btn btn-outline-secondary" th:href="@{/admin/employees}">Back to list</a>
+    </div>
+
+    <form th:action="@{/admin/employees/save}" th:object="${form}" method="post" novalidate data-once>
+        <input type="hidden" th:field="*{id}">
+        <div class="row g-3">
+            <div class="col-lg-7">
+                <div class="panel">
+                    <div class="panel-head"><h2>Personal and job details</h2></div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6"><div th:replace="~{fragments/forms :: input('firstName', 'First name', 'text')}"></div></div>
+                            <div class="col-md-6"><div th:replace="~{fragments/forms :: input('lastName', 'Last name', 'text')}"></div></div>
+                        </div>
+                        <div th:replace="~{fragments/forms :: input('email', 'Email (also the login)', 'email')}"></div>
+                        <div class="row">
+                            <div class="col-md-6"><div th:replace="~{fragments/forms :: input('phone', 'Phone', 'tel')}"></div></div>
+                            <div class="col-md-6"><div th:replace="~{fragments/forms :: input('joiningDate', 'Joining date', 'date')}"></div></div>
+                        </div>
+                        <div th:replace="~{fragments/forms :: input('address', 'Address', 'text')}"></div>
+                        <div class="row">
+                            <div class="col-md-6"><div th:replace="~{fragments/forms :: input('designation', 'Designation', 'text')}"></div></div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="departmentId">Department</label>
+                                <select class="form-select" th:field="*{departmentId}">
+                                    <option value="">No department</option>
+                                    <option th:each="d : ${departments}" th:value="${d.id}" th:text="${d.name}">Engineering</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="panel mb-3">
+                    <div class="panel-head"><h2>Monthly salary structure</h2></div>
+                    <div class="panel-body">
+                        <div th:replace="~{fragments/forms :: money('basicSalary', 'Basic salary')}"></div>
+                        <div th:replace="~{fragments/forms :: money('hra', 'House rent allowance')}"></div>
+                        <div th:replace="~{fragments/forms :: money('allowances', 'Other allowances')}"></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-head"><h2>Account</h2></div>
+                    <div class="panel-body">
+                        <div class="mb-3">
+                            <label class="form-label" for="password" th:text="${form.id == null} ? 'Initial password' : 'New password (leave blank to keep the current one)'">Password</label>
+                            <input class="form-control" type="password" th:field="*{password}" th:errorclass="is-invalid" autocomplete="new-password">
+                            <div class="invalid-feedback" th:errors="*{password}">Error</div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" th:field="*{active}">
+                            <label class="form-check-label" for="active">Account is active and can sign in</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Save employee</button>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/employees}">Cancel</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>

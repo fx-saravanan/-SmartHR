@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Leave analytics', 'analytics', ~{::section.page}, ~{::script})}">
+<body>
+<section class="page">
+    <div class="page-head">
+        <div><h1>Leave analytics and forecast</h1><p>Trends from approved leave, and a forecast learned from the last two years.</p></div>
+        <form method="get" th:action="@{/admin/analytics}" class="d-flex gap-2 align-items-center">
+            <label class="text-secondary" for="year">Year</label>
+            <select class="form-select" id="year" name="year" onchange="this.form.submit()">
+                <option th:each="y : ${yearOptions}" th:value="${y}" th:text="${y}" th:selected="${y == year}">2026</option>
+            </select>
+        </form>
+    </div>
+
+    <div class="panel mb-3">
+        <div class="panel-head">
+            <h2>Company forecast: next 3 months</h2>
+            <span class="status" th:classappend="'st-' + ${#strings.toLowerCase(forecast.trend)}"
+                  th:text="${forecast.trend} + ' (' + ${forecast.trendPercent} + '% a month)'">Stable</span>
+        </div>
+        <div class="panel-body">
+            <div class="chart-box"><canvas id="forecastChart"></canvas></div>
+            <div class="row g-3 mt-2">
+                <div class="col-md-8"><p class="insight mb-0" th:text="${forecast.insight}">Insight</p></div>
+                <div class="col-md-4 small text-secondary">
+                    <div>Average: <strong th:text="${forecast.averageMonthly}">0</strong> days a month</div>
+                    <div>Last 3 months average: <strong th:text="${forecast.movingAverage}">0</strong></div>
+                    <div>Model fit (R&sup2;): <strong th:text="${forecast.RSquared}">0</strong>, typical error: <strong th:text="${forecast.mae}">0</strong> days</div>
+                </div>
+            </div>
+            <p class="small text-secondary mt-3 mb-0">Method: seasonal-adjusted linear regression on monthly leave days over the past
+                <span th:text="${historyMonths}">24</span> months. The shaded band is roughly a 95% range. With little history the band is wide and the forecast should be read as a rough guide.</p>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-xl-6"><div class="panel h-100"><div class="panel-head"><h2 th:text="'Leave days by month, ' + ${year}">By month</h2></div>
+            <div class="panel-body"><div class="chart-box short"><canvas id="monthChart"></canvas></div></div></div></div>
+        <div class="col-xl-6"><div class="panel h-100"><div class="panel-head"><h2 th:text="'Leave days by department, ' + ${year}">By dept</h2></div>
+            <div class="panel-body"><div class="chart-box short"><canvas id="deptChart"></canvas></div></div></div></div>
+        <div class="col-xl-4"><div class="panel h-100"><div class="panel-head"><h2>Leave mix</h2></div>
+            <div class="panel-body"><div class="chart-box short"><canvas id="typeChart"></canvas></div></div></div></div>
+        <div class="col-xl-8">
+            <div class="panel h-100">
+                <div class="panel-head"><h2>Department forecast</h2></div>
+                <div class="table-wrap"><table class="table">
+                    <thead><tr><th>Department</th><th>Next month</th><th class="num">Expected days</th><th class="num">Monthly average</th><th>Trend</th></tr></thead>
+                    <tbody>
+                    <tr th:each="f : ${deptForecasts}">
+                        <td class="fw-semibold" th:text="${f.scope}">Dept</td>
+                        <td th:text="${f.nextMonthLabel}">Month</td>
+                        <td class="num" th:text="${f.nextMonth}">0</td>
+                        <td class="num" th:text="${f.averageMonthly}">0</td>
+                        <td><span th:replace="~{fragments/forms :: badge(${f.trend})}"></span></td>
+                    </tr>
+                    <tr th:if="${deptForecasts.isEmpty()}"><td colspan="5" class="empty">Not enough approved leave yet to forecast by department.</td></tr>
+                    </tbody></table></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-head"><h2>Employees with unusually high leave in the last six months</h2></div>
+        <div class="table-wrap"><table class="table">
+            <thead><tr><th>Employee</th><th>Department</th><th class="num">Leave days</th><th class="num">Of which sick</th><th class="num">Times the average</th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${risks}"><td class="fw-semibold" th:text="${r.name}">Name</td><td th:text="${r.department}">Dept</td>
+                <td class="num" th:text="${r.leaveDays}">0</td><td class="num" th:text="${r.sickDays}">0</td><td class="num" th:text="${r.ratioToAverage} + 'x'">1x</td></tr>
+            <tr th:if="${risks.isEmpty()}"><td colspan="5" class="empty">No one stands out from the average right now.</td></tr>
+            </tbody></table></div>
+    </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    const hl = /*[[${forecast.historyLabels}]]*/ [], hv = /*[[${forecast.historyValues}]]*/ [];
+    const fl = /*[[${forecast.forecastLabels}]]*/ [], fv = /*[[${forecast.forecastValues}]]*/ [];
+    const lo = /*[[${forecast.lowerBand}]]*/ [], hi = /*[[${forecast.upperBand}]]*/ [];
+    const pad = hl.map(() => null);
+    const joinAt = hl.map((_, i) => i === hl.length - 1 ? hv[i] : null);
+    new Chart(document.getElementById('forecastChart'), {
+        type: 'line',
+        data: { labels: hl.concat(fl), datasets: [
+            { label: 'Upper range', data: pad.concat(hi), borderColor: 'transparent', backgroundColor: 'rgba(15,123,132,.14)', fill: '+1', pointRadius: 0 },
+            { label: 'Lower range', data: pad.concat(lo), borderColor: 'transparent', pointRadius: 0 },
+            { label: 'Actual', data: hv.concat(fl.map(() => null)), borderColor: '#0E3B43', backgroundColor: '#0E3B43', tension: .25, pointRadius: 2 },
+            { label: 'Forecast', data: joinAt.concat(fv), borderColor: '#B97A0A', backgroundColor: '#B97A0A', borderDash: [6, 4], tension: .25, pointRadius: 4 }
+        ] },
+        options: { maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { labels: { filter: (i) => i.text !== 'Lower range' && i.text !== 'Upper range' } } },
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'Leave days' } }, x: { ticks: { maxTicksLimit: 12 } } } }
+    });
+    new Chart(document.getElementById('monthChart'), {
+        type: 'bar',
+        data: { labels: /*[[${monthLabels}]]*/ [], datasets: [{ label: 'Leave days', data: /*[[${monthlyLeave}]]*/ [], backgroundColor: '#0F7B84', borderRadius: 4 }] },
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+    new Chart(document.getElementById('deptChart'), {
+        type: 'bar',
+        data: { labels: /*[[${deptLabels}]]*/ [], datasets: [{ label: 'Leave days', data: /*[[${deptValues}]]*/ [], backgroundColor: '#16505A', borderRadius: 4 }] },
+        options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+    new Chart(document.getElementById('typeChart'), {
+        type: 'doughnut',
+        data: { labels: /*[[${typeLabels}]]*/ [], datasets: [{ data: /*[[${typeValues}]]*/ [], backgroundColor: ['#0F7B84', '#B97A0A', '#16505A', '#8FA7AB'] }] },
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    });
+</script>
+</body>
+</html>

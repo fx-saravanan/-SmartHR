@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('My leave', 'leaves', ~{::section.page}, ~{})}">
+<body>
+<section class="page">
+    <div class="page-head">
+        <div><h1>My leave</h1><p th:text="'Balances for ' + ${year}">Balances</p></div>
+        <a class="btn btn-primary" th:href="@{/employee/leaves/apply}"><i class="bi bi-calendar-plus me-1"></i>Apply for leave</a>
+    </div>
+    <div class="row g-3 mb-3">
+        <div class="col-md-4" th:each="b : ${balances}"><div class="stat">
+            <div class="label" th:text="${b.type.label}">Casual</div>
+            <div class="value" th:text="${b.available}">0</div>
+            <div class="hint" th:text="'available. ' + ${b.used} + ' used, ' + ${b.pending} + ' pending, ' + ${b.allocated} + ' allotted'">x</div>
+            <div class="meter mt-2" th:classappend="${b.usedPercent >= 80} ? 'warn'"><span th:style="'width:' + ${b.usedPercent} + '%'"></span></div>
+        </div></div>
+    </div>
+    <p class="small text-secondary">Unpaid leave has no balance. It is deducted from salary for the days taken.</p>
+
+    <div class="panel"><div class="panel-head"><h2>Applications</h2></div>
+        <div class="table-wrap"><table class="table">
+            <thead><tr><th>Leave</th><th>Dates</th><th class="num">Days</th><th>Reason</th><th>Status</th><th>Admin remark</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${requests}">
+                <td th:text="${r.leaveType.label}">Casual</td>
+                <td class="text-nowrap" th:text="${#temporals.format(r.startDate, 'dd MMM')} + ' - ' + ${#temporals.format(r.endDate, 'dd MMM yyyy')}">dates</td>
+                <td class="num" th:text="${r.days}">1</td>
+                <td style="max-width:220px" th:text="${r.reason}">Reason</td>
+                <td><span th:replace="~{fragments/forms :: badge(${r.status})}"></span></td>
+                <td th:text="${r.adminRemark} ?: '-'">-</td>
+                <td class="text-end">
+                    <form th:if="${r.status.name() == 'PENDING' or (r.status.name() == 'APPROVED' and r.startDate.isAfter(today))}"
+                          th:action="@{/employee/leaves/{id}/cancel(id=${r.id})}" method="post" data-confirm="Cancel this leave request?">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Cancel</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${requests.isEmpty()}"><td colspan="7" class="empty">No applications yet. Use "Apply for leave" to send your first request.</td></tr>
+            </tbody></table></div></div>
+</section>
+</body>
+</html>

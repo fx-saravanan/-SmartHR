@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Employees', 'employees', ~{::section.page}, ~{})}">
+<body>
+<section class="page">
+    <div class="page-head">
+        <div><h1>Employees</h1><p th:text="${employees.size()} + ' shown'">0 shown</p></div>
+        <a class="btn btn-primary" th:href="@{/admin/employees/new}"><i class="bi bi-person-plus me-1"></i>Add employee</a>
+    </div>
+
+    <form class="panel panel-body mb-3 row g-2 align-items-end" method="get" th:action="@{/admin/employees}">
+        <div class="col-md-6">
+            <label class="form-label" for="q">Search</label>
+            <input class="form-control" id="q" name="q" th:value="${q}" placeholder="Name, email or employee ID">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label" for="dept">Department</label>
+            <select class="form-select" id="dept" name="dept">
+                <option value="0">All departments</option>
+                <option th:each="d : ${departments}" th:value="${d.id}" th:text="${d.name}" th:selected="${d.id == dept}">Dept</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button class="btn btn-primary flex-fill" type="submit">Filter</button>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/employees}">Reset</a>
+        </div>
+    </form>
+
+    <div class="panel">
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Employee</th><th>ID</th><th>Department</th><th>Designation</th><th>Joined</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="e : ${employees}">
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar" th:text="${#strings.substring(e.firstName,0,1)} + ${#strings.substring(e.lastName,0,1)}">AB</span>
+                            <div><div class="fw-semibold" th:text="${e.fullName}">Name</div><div class="small text-secondary" th:text="${e.email}">mail</div></div>
+                        </div>
+                    </td>
+                    <td th:text="${e.employeeCode}">EMP0001</td>
+                    <td th:text="${e.department != null} ? ${e.department.name} : '-'">Dept</td>
+                    <td th:text="${e.designation}">Role</td>
+                    <td th:text="${#temporals.format(e.joiningDate, 'dd MMM yyyy')}">date</td>
+                    <td><span th:replace="~{fragments/forms :: badge(${e.active} ? 'ACTIVE' : 'INACTIVE')}"></span></td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/admin/employees/{id}(id=${e.id})}">View</a>
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/employees/{id}/edit(id=${e.id})}">Edit</a>
+                    </td>
+                </tr>
+                <tr th:if="${employees.isEmpty()}"><td colspan="7" class="empty">No employees match. Clear the filters or add a new employee.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+</body>
+</html>
